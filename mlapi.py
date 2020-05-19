@@ -211,5 +211,9 @@ if __name__ == '__main__':
     g.log.info ('--------| mlapi version:{} |--------'.format(__version__))
     g.log.info ('Starting server with max:{} processes'.format
     (g.config['processes']))
+    pid = os.getpid()
+    op = open("/var/run/mlapi.pid", "w")
+    op.write(f'{pid}')
+    op.close()
     #app.run(host='0.0.0.0', port=5000, threaded=True)
     app.run(host='0.0.0.0', port=g.config['port'], threaded=False, processes=g.config['processes'])

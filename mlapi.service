@@ -25,12 +25,11 @@ RestartSec=5
 Environment=PYTHONUNBUFFERED=1
 
 # change this 
-WorkingDirectory=/var/lib/zmeventnotification/mlapi
+WorkingDirectory=/config/mlapi
 # Change to your username
 User=www-data
 #Change paths if needed
-ExecStart=/usr/bin/python3 mlapi.py -c ./mlapiconfig.ini
-
+ExecStart=/usr/bin/python3 mlapi.py -c ./mlapiconfig_zm.ini
 
 StandardOutput=file:/var/log/zm/mlapi.log
 StandardError=file:/var/log/zm/mlapi_error.log

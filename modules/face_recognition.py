@@ -46,7 +46,10 @@ class Face:
 
 
     def get_classes(self):
-        return self.knn.classes_
+        if self.knn:
+            return self.knn.classes_
+        else:
+            return np.array([])
 
     def _rescale_rects(self, a):
         rects = []
@@ -86,18 +89,25 @@ class Face:
         if not len(face_encodings):
             g.log.debug ('Face recognition: no faces found')
             return [],[],[]
-
-        # Use the KNN model to find the best matches for the test face
-        start = datetime.datetime.now()
-        closest_distances = self.knn.kneighbors(face_encodings, n_neighbors=1)
-        are_matches = [closest_distances[0][i][0] <= g.config['face_recog_dist_threshold'] for i in range(len(face_locations))]
-        diff_time = (datetime.datetime.now() - start).microseconds/1000
-        g.logger.debug ('Matching recognized faces to known faces took {} milliseconds'.format(diff_time))
+        
+        detections = []
+        if self.knn:
+            # Use the KNN model to find the best matches for the test face
+            start = datetime.datetime.now()
+            closest_distances = self.knn.kneighbors(face_encodings, n_neighbors=1)
+            are_matches = [closest_distances[0][i][0] <= g.config['face_recog_dist_threshold'] for i in range(len(face_locations))]
+            diff_time = (datetime.datetime.now() - start).microseconds/1000
+            g.logger.debug ('Matching recognized faces to known faces took {} milliseconds'.format(diff_time))
+            predicts = self.knn.predict(face_encodings),
+        else:
+            predicts = np.zeros(len(face_encodings))
+            are_matches = np.zeros(len(face_encodings))
 
         matched_face_names = []
         matched_face_rects = []
 
-        for pred, loc, rec in zip(self.knn.predict(face_encodings), face_locations, are_matches):
+        
+        for pred, loc, rec in zip(predicts, face_locations, are_matches):
             label = pred if rec else g.config['unknown_face_name']
             if not rec and g.config['save_unknown_faces'] == 'yes':
                 h,w,c = image.shape
@@ -108,7 +118,7 @@ class Face:
                 y2 = min(loc[2]+g.config['save_unknown_faces_leeway_pixels'], h)
                 #print (image)
                 crop_img = image[y1:y2, x1:x2]
-               # crop_img = image
+            # crop_img = image
                 timestr = time.strftime("%b%d-%Hh%Mm%Ss-")
                 unf = g.config['unknown_faces_path'] + '/' + timestr+str(uuid.uuid4())+'.jpg'
                 g.logger.info ('Saving cropped unknown face at [{},{},{},{} - includes leeway of {}px] to {}'.format(x1,y1,x2,y2,g.config['save_unknown_faces_leeway_pixels'],unf))
@@ -117,9 +127,6 @@ class Face:
             matched_face_rects.append((loc[3], loc[0], loc[1], loc[2]))
             matched_face_names.append(label)
             conf.append(1)
-
-        
-        detections = []
 
         for l, c, b in zip(matched_face_names, conf, matched_face_rects):
             c = "{:.2f}%".format(c * 100)

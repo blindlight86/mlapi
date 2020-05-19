@@ -1,3 +1,18 @@
+魔改版
+=====
+默认支持GPU，人脸识别使用CNN。
+适配魔改版[zoneminder](https://github.com/blindlight86/zoneminder)，首次使用请在docker中进入运行
+```
+cd /config/mlapi
+python3 ./mlapi.py -c mlapiconfig_zm.ini
+```
+一切正常后
+```
+echo "yes" > mlapi_ok
+```
+zoneminder会在重启后自动后台运行本服务。
+
+
 What
 =====
 An API gateway that you can install in your own server to do object, face and gender recognition.

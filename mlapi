@@ -1,0 +1,58 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          mlapi
+# Short-Description:  Control mlapi as a Service
+### END INIT INFO
+
+prog=MLApi
+MLAPI_PATH="/config/mlapi"
+command="/usr/bin/python3"
+BIN="mlapi.py"
+configfile="mlapiconfig_zm.ini"
+pidfile="/var/run/mlapi.pid"
+logfile="/var/log/mlapi.log"
+
+start() {
+        echo "Starting $prog:"
+        cd $MLAPI_PATH
+        if [ -f $pidfile ]; then
+            echo "$prog is already running"
+        else
+            $command $BIN -c ./$configfile >/dev/null 2>&1 &
+            echo "$prog started successfully"
+        fi
+        
+}
+stop() {
+        echo "Stopping $prog:"
+        PID=$(cat $pidfile)
+        kill $PID
+        echo "$prog is stopped"
+        rm -f $pidfile
+}
+status() {
+        if [ -f $pidfile ]; then
+            echo "$prog is running"
+        else
+            echo "$prog is stopped"
+        fi
+}
+
+case "$1" in
+'start')
+        start
+        ;;
+'stop')
+        stop
+        ;;
+'restart' | 'force-reload')
+        stop
+        start
+        ;;
+'status')
+        status
+        ;;
+*)
+        echo "Usage: $0 { start | stop | restart | status }"
+        ;;
+esac
