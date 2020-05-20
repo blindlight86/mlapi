@@ -18,3 +18,4 @@ models/
 .tox
 .cache
 .vscode/settings.json
+.vscode/settings.json

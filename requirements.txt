@@ -10,4 +10,3 @@ Flask_RESTful
 Flask
 progressbar33
 scikit_learn
-face_recognition
